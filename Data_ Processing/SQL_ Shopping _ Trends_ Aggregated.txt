@@ -1,0 +1,120 @@
+SELECT*FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA"
+LIMIT 5;
+
+--EDA understanding the data given
+---Checking values in the column
+
+SELECT DISTINCT gender 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT DISTINCT item_purchased 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT DISTINCT category 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT DISTINCT "Purchase Amount (USD)" 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT DISTINCT location 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT DISTINCT size 
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+---Analysis
+SELECT age, 
+CASE
+    WHEN age BETWEEN 18 AND 30 THEN 'Youth'
+    WHEN age BETWEEN 31 AND 40 THEN 'Adult'
+    WHEN age BETWEEN 41 AND 50 THEN 'Senior'
+    ELSE 'Elder'
+END AS age_buckets
+FROM "SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+-----------------------------------------------------------------------
+
+SELECT MAX("Purchase Amount (USD)")
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT MIN("Purchase Amount (USD)")
+FROM"SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+SELECT
+  "Purchase Amount (USD)",
+  CASE 
+    WHEN "Purchase Amount (USD)" BETWEEN 20 AND 30 THEN '01 20-30 Low spend'
+    WHEN "Purchase Amount (USD)" BETWEEN 31 AND 50 THEN '02 31-50 Medium spend'
+    WHEN "Purchase Amount (USD)" BETWEEN 51 AND 70 THEN '03 51-70 High spend'
+    ELSE '04 70+ Very High spend'
+  END AS spend_buckets
+FROM "SHOPPING_TRENDS"."SALES"."SHOP_DATA";
+
+-------------------------------------------------------------------
+
+SELECT 
+  gender,
+  age,
+  -- Age bucket
+  CASE
+    WHEN age BETWEEN 18 AND 30 THEN 'Youth'
+    WHEN age BETWEEN 31 AND 40 THEN 'Adult'
+    WHEN age BETWEEN 41 AND 50 THEN 'Senior'
+    ELSE 'Elder'
+  END AS age_bucket,
+
+  "Purchase Amount (USD)",
+  -- Spend bucket
+  CASE 
+    WHEN "Purchase Amount (USD)" BETWEEN 20 AND 30 THEN '01 20-30 Low spend'
+    WHEN "Purchase Amount (USD)" BETWEEN 31 AND 50 THEN '02 31-50 Medium spend'
+    WHEN "Purchase Amount (USD)" BETWEEN 51 AND 70 THEN '03 51-70 High spend'
+    ELSE '04 70+ Very High spend'
+  END AS spend_bucket,
+
+  review_rating,
+  -- Review bucket
+  CASE
+    WHEN review_rating <= 3.0 THEN 'Bad'
+    WHEN review_rating <= 4.0 THEN 'Neutral'
+    ELSE 'Good'
+  END AS review_bucket,
+
+  subscription_status,
+  shipping_type,
+  discount_applied,
+  promo_code_used,
+  previous_purchases,
+  payment_method,
+  frequency_of_purchases,
+
+  -- Date breakdown
+  TO_DATE(processdate, 'YYYY/MM/DD HH24:MI') AS purchase_date,
+  DAYNAME(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI')) AS day_name,
+  MONTHNAME(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI')) AS month_name,
+  TO_CHAR(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI'), 'YYYYMM') AS month_ID,
+  DAYOFMONTH(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI')) AS day_of_month,
+
+  -- Aggregates
+  SUM("Purchase Amount (USD)") AS revenue,
+  COUNT(DISTINCT customer_id) AS number_of_customers
+
+FROM "SHOPPING_TRENDS"."SALES"."SHOP_DATA"
+
+GROUP BY 
+  gender,
+  age,
+  "Purchase Amount (USD)",
+  review_rating,
+  subscription_status,
+  shipping_type,
+  discount_applied,
+  promo_code_used,
+  previous_purchases,
+  payment_method,
+  frequency_of_purchases,
+  TO_DATE(processdate, 'YYYY/MM/DD HH24:MI'),
+  DAYNAME(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI')),
+  MONTHNAME(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI')),
+  TO_CHAR(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI'), 'YYYYMM'),
+  DAYOFMONTH(TO_DATE(processdate, 'YYYY/MM/DD HH24:MI'))
